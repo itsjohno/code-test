@@ -1,14 +1,11 @@
 package io.github.itsjohno.codetest.controllers;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.fasterxml.jackson.databind.util.JSONPObject;
+
 import io.github.itsjohno.codetest.models.Dog;
 import io.github.itsjohno.codetest.repository.DogRepository;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -27,8 +24,7 @@ public class DogsController {
         return dogRepository.findAll();
     }
 
-    @PostMapping
-    @RequestMapping(value = "/upload")
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public void createDogs(@RequestBody JsonNode jsonObject) {
 
         List<Dog> dogsToCreate = new ArrayList<>();
