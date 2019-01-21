@@ -19,10 +19,9 @@ public class Dog {
     private String breed;
 
     @ElementCollection
-    private List<String> characteristics;
-
-    @ElementCollection
     private List<String> types;
+
+    public Dog() {}
 
     public Dog(String breed) {
         this.breed = breed;
@@ -34,13 +33,5 @@ public class Dog {
         }
 
         types.add(type);
-    }
-
-    public void addCharacteristic(String characteristic) {
-        if (null == this.characteristics) {
-            this.characteristics = new ArrayList<>();
-        }
-
-        types.add(characteristic);
     }
 }
