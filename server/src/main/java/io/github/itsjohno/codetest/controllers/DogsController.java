@@ -1,15 +1,16 @@
 package io.github.itsjohno.codetest.controllers;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.util.JSONPObject;
 import io.github.itsjohno.codetest.models.Dog;
 import io.github.itsjohno.codetest.repository.DogRepository;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping(value = "/dogs")
@@ -31,18 +32,32 @@ public class DogsController {
     public void createDogs(@RequestBody JsonNode jsonObject) {
 
         List<Dog> dogsToCreate = new ArrayList<>();
-        Iterator<Map.Entry<String, JsonNode>> fields = jsonObject.fields();
-        fields.forEachRemaining(entry -> {
-            Dog tempDog = new Dog();
 
-            // The KEY is the breed name
-            tempDog.setBreed(entry.getKey());
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            dogsToCreate.addAll(Arrays.asList(objectMapper.convertValue(jsonObject, Dog[].class)));
+        }
+        catch (Exception exception) {
+            // We've blown up during deserialisation. Let's just move on to see if it's other format.
+        }
 
-            // The VALUE is an array of strings for each type
-            entry.getValue().elements().forEachRemaining(value -> tempDog.addType(value.asText()));
+        if (0 == dogsToCreate.size()) {
 
-            dogsToCreate.add(tempDog);
-        });
+            // No dogs have been created, let's see if we've been passed in a non-API format.
+
+            Iterator<Map.Entry<String, JsonNode>> fields = jsonObject.fields();
+            fields.forEachRemaining(entry -> {
+                Dog tempDog = new Dog();
+
+                // The KEY is the breed name
+                tempDog.setBreed(entry.getKey());
+
+                // The VALUE is an array of strings for each type
+                entry.getValue().elements().forEachRemaining(value -> tempDog.addType(value.asText()));
+
+                dogsToCreate.add(tempDog);
+            });
+        }
 
         dogRepository.saveAll(dogsToCreate);
     }
