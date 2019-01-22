@@ -1,6 +1,5 @@
 package io.github.itsjohno.codetest.controllers;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,8 +21,9 @@ public class DogsController {
     }
 
     @GetMapping
-    public Iterable<Dog> getDogs() {
-        return dogRepository.findAll();
+    public ResponseEntity<Iterable<Dog>> getDogs() {
+        Iterable<Dog> dogCollection = dogRepository.findAll();
+        return ResponseEntity.ok(dogCollection);
     }
 
     @GetMapping(value = "/{dogBreed}")
@@ -61,7 +61,7 @@ public class DogsController {
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public void createDogs(@RequestBody JsonNode jsonObject) {
+    public void uploadDogs(@RequestBody JsonNode jsonObject) {
 
         List<Dog> dogsToCreate = new ArrayList<>();
 
