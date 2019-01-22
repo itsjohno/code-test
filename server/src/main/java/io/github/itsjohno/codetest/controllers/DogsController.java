@@ -1,5 +1,8 @@
 package io.github.itsjohno.codetest.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,11 +19,12 @@ public class DogsController {
 
     private DogRepository dogRepository;
 
+    @Autowired
     public DogsController(DogRepository dogRepository) {
         this.dogRepository = dogRepository;
     }
 
-    @GetMapping
+    @GetMapping(value = "")
     public ResponseEntity<Iterable<Dog>> getDogs() {
         Iterable<Dog> dogCollection = dogRepository.findAll();
         return ResponseEntity.ok(dogCollection);
@@ -39,8 +43,16 @@ public class DogsController {
 
     @DeleteMapping(value = "/{breed}")
     public ResponseEntity deleteDog(@PathVariable String breed) {
-        dogRepository.deleteById(breed);
-        return ResponseEntity.noContent().build();
+        boolean deleted = true;
+
+        try {
+            dogRepository.deleteById(breed);
+        }
+        catch (EmptyResultDataAccessException emptyException) {
+            deleted = false;
+        }
+
+        return ResponseEntity.status(deleted ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND).build();
     }
 
     @DeleteMapping(value = "/{breed}/{type}")
@@ -49,11 +61,14 @@ public class DogsController {
 
         if (foundDog.isPresent()) {
             Dog dog = foundDog.get();
+
             if (dog.getTypes().contains(type)) {
                 dog.getTypes().remove(type);
+                dogRepository.save(dog);
+                return ResponseEntity.noContent().build();
+            } else {
+                return ResponseEntity.notFound().build();
             }
-            dogRepository.save(dog);
-            return ResponseEntity.noContent().build();
         }
         else {
             return ResponseEntity.notFound().build();
