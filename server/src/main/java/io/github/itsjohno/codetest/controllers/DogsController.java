@@ -1,5 +1,7 @@
 package io.github.itsjohno.codetest.controllers;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +26,40 @@ public class DogsController {
         return dogRepository.findAll();
     }
 
+    @GetMapping(value = "/{dogBreed}")
+    public ResponseEntity<Dog> getDog(@PathVariable String dogBreed) {
+        Optional<Dog> foundDog = dogRepository.findById(dogBreed);
+
+        if (foundDog.isPresent()) {
+            return ResponseEntity.ok(foundDog.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping(value = "/{breed}")
+    public ResponseEntity deleteDog(@PathVariable String breed) {
+        dogRepository.deleteById(breed);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(value = "/{breed}/{type}")
+    public ResponseEntity deleteDog(@PathVariable String breed, @PathVariable String type) {
+        Optional<Dog> foundDog = dogRepository.findById(breed);
+
+        if (foundDog.isPresent()) {
+            Dog dog = foundDog.get();
+            if (dog.getTypes().contains(type)) {
+                dog.getTypes().remove(type);
+            }
+            dogRepository.save(dog);
+            return ResponseEntity.noContent().build();
+        }
+        else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public void createDogs(@RequestBody JsonNode jsonObject) {
 
@@ -38,7 +74,6 @@ public class DogsController {
         }
 
         if (0 == dogsToCreate.size()) {
-
             // No dogs have been created, let's see if we've been passed in a non-API format.
 
             Iterator<Map.Entry<String, JsonNode>> fields = jsonObject.fields();
