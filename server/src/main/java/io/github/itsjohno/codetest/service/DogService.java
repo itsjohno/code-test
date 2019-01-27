@@ -6,9 +6,11 @@ import io.github.itsjohno.codetest.model.Dog;
 import io.github.itsjohno.codetest.repository.DogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Service
 public class DogService {
 
     private DogRepository dogRepository;
@@ -65,6 +67,9 @@ public class DogService {
         return deleted;
     }
 
+    public void addDog(Dog dog) {
+        dogRepository.save(dog);
+    }
 
     public void uploadDogs(JsonNode jsonObject) {
         List<Dog> dogsToCreate = new ArrayList<>();

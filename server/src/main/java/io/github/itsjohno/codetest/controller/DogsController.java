@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -42,6 +43,17 @@ public class DogsController {
         }
     }
 
+    @RequestMapping(value = "", method = RequestMethod.POST)
+    public ResponseEntity<Dog> addDog(@RequestBody Dog dogObject) {
+        dogService.addDog(dogObject);
+        return ResponseEntity.created(URI.create("/dogs/" + dogObject.getBreed())).build();
+    }
+
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    public void uploadDogs(@RequestBody JsonNode jsonObject) {
+        dogService.uploadDogs(jsonObject);
+    }
+
     @RequestMapping(value = "", method = RequestMethod.DELETE)
     public ResponseEntity deleteAll() {
         dogService.deleteAllDogs();
@@ -64,10 +76,5 @@ public class DogsController {
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public void uploadDogs(@RequestBody JsonNode jsonObject) {
-        dogService.uploadDogs(jsonObject);
     }
 }
