@@ -1,4 +1,4 @@
-package io.github.itsjohno.codetest.models;
+package io.github.itsjohno.codetest.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;

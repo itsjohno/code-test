@@ -1,17 +1,17 @@
-package io.github.itsjohno.codetest.controllers;
+package io.github.itsjohno.codetest.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.github.itsjohno.codetest.models.Dog;
+import io.github.itsjohno.codetest.model.Dog;
 import io.github.itsjohno.codetest.repository.DogRepository;
 
 import java.util.*;
+import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping(value = "/dogs")
@@ -27,12 +27,18 @@ public class DogsController {
     @GetMapping(value = "")
     public ResponseEntity<Iterable<Dog>> getDogs() {
         Iterable<Dog> dogCollection = dogRepository.findAll();
-        return ResponseEntity.ok(dogCollection);
+        long count = StreamSupport.stream(dogCollection.spliterator(), false).count();
+
+        if (count > 0) {
+            return ResponseEntity.ok(dogCollection);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @GetMapping(value = "/{dogBreed}")
-    public ResponseEntity<Dog> getDog(@PathVariable String dogBreed) {
-        Optional<Dog> foundDog = dogRepository.findById(dogBreed);
+    @GetMapping(value = "/{breed}")
+    public ResponseEntity<Dog> getDog(@PathVariable String breed) {
+        Optional<Dog> foundDog = dogRepository.findById(breed);
 
         if (foundDog.isPresent()) {
             return ResponseEntity.ok(foundDog.get());
@@ -41,18 +47,21 @@ public class DogsController {
         }
     }
 
+    @DeleteMapping
+    public ResponseEntity deleteAll() {
+        dogRepository.deleteAll();
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping(value = "/{breed}")
     public ResponseEntity deleteDog(@PathVariable String breed) {
-        boolean deleted = true;
-
         try {
             dogRepository.deleteById(breed);
+            return ResponseEntity.ok().build();
         }
         catch (EmptyResultDataAccessException emptyException) {
-            deleted = false;
+            return ResponseEntity.notFound().build();
         }
-
-        return ResponseEntity.status(deleted ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND).build();
     }
 
     @DeleteMapping(value = "/{breed}/{type}")
@@ -65,14 +74,11 @@ public class DogsController {
             if (dog.getTypes().contains(type)) {
                 dog.getTypes().remove(type);
                 dogRepository.save(dog);
-                return ResponseEntity.noContent().build();
-            } else {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.ok().build();
             }
         }
-        else {
-            return ResponseEntity.notFound().build();
-        }
+
+        return ResponseEntity.notFound().build();
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
