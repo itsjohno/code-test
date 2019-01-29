@@ -1,4 +1,7 @@
 # code-test
+## Deployed Version
+A deployed version of this can be found running on Heroku: https://itsjohno-codetest.herokuapp.com/
+
 ## Build and Run
 Run the solution, easily, from your machine:
 ```
