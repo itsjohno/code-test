@@ -23,7 +23,7 @@ public class DogService {
     public Collection<Dog> findDogs(String breed) {
         Collection<Dog> dogCollection = new ArrayList<>();
 
-        if (breed.isBlank()) {
+        if (breed.isEmpty()) {
             // We want to get all dogs, so lets move the iterable into a collection.
             dogRepository.findAll().forEach(dogCollection::add);
         } else {
@@ -67,8 +67,15 @@ public class DogService {
         return deleted;
     }
 
-    public void addDog(Dog dog) {
-        dogRepository.save(dog);
+    public boolean addDog(Dog dog) {
+        boolean persisted = false;
+
+        if (null != dog.getBreed() && dog.getBreed().isEmpty()) {
+            dogRepository.save(dog);
+            persisted = true;
+        }
+
+        return persisted;
     }
 
     public void uploadDogs(JsonNode jsonObject) {

@@ -45,8 +45,12 @@ public class DogsController {
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     public ResponseEntity<Dog> addDog(@RequestBody Dog dogObject) {
-        dogService.addDog(dogObject);
-        return ResponseEntity.created(URI.create("/dogs/" + dogObject.getBreed())).build();
+        if (dogService.addDog(dogObject)) {
+            return ResponseEntity.created(URI.create("/dogs/" + dogObject.getBreed())).build();
+        }
+        else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
